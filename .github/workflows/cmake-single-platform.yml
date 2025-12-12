@@ -19,13 +19,15 @@ jobs:
 
     - name: Install Conan
       uses: conan-io/setup-conan@v1
-      
-    - name: Configure CMake
 
+    - name: Build Dependencies
       run: |
         conan install -of build --build=missing
+      
+    - name: Configure CMake
+      run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake .. -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake  -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=Release
         cd ..
 
     - name: Build
