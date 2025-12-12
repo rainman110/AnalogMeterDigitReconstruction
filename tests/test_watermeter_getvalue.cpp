@@ -622,9 +622,15 @@ void flowIssue2857_case02(void)
         1e-5, 1017.8099,
         meter.getValue({0.0, 1.0, 0.0, 1.0, 6.9, 8.2, 0.9, 9.9, 9.8}).value);
 
-    meter.setNDecimalPlaces(6);
 
     // and deccimal shift
+    meter.setDecimalShift(-2);
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 10.178099,
+        meter.getValue({0.0, 1.0, 0.0, 1.0, 6.9, 8.2, 0.9, 9.9, 9.8}).value);
+
+    // alternatively set the number of decimals
+    meter.setNDecimalPlaces(6);
     TEST_ASSERT_FLOAT_WITHIN(
         1e-5, 10.178099,
         meter.getValue({0.0, 1.0, 0.0, 1.0, 6.9, 8.2, 0.9, 9.9, 9.8}).value);
@@ -639,7 +645,7 @@ void flowIssue2857_case03(void)
         1e-5, 778.1480,
         meter.getValue({0.0, 7.0, 7.0, 7.9, 1.4, 4.7, 8.0, 0.5}).value);
 
-    meter.setNDecimalPlaces(1);
+    meter.setDecimalShift(3);
     TEST_ASSERT_FLOAT_WITHIN(
         1e-5, 778148.0,
         meter.getValue({0.0, 7.0, 7.0, 7.9, 1.4, 4.7, 8.0, 0.5}).value);

@@ -82,6 +82,12 @@ ClassAnalogDigitalMeter &ClassAnalogDigitalMeter::setNDecimalPlaces(size_t n)
     return *this;
 }
 
+ClassAnalogDigitalMeter &ClassAnalogDigitalMeter::setDecimalShift(int shift)
+{
+    m_nDecimalPlaces = std::max(size_t(0), m_nDials - shift);
+    return *this;
+}
+
 ClassAnalogDigitalMeter &ClassAnalogDigitalMeter::setAnalogDigitalTransitionEnd(double val)
 {
     val = modulo(val, 10.);

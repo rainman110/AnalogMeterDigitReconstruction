@@ -80,6 +80,15 @@ public:
      */
     ClassAnalogDigitalMeter& setNDecimalPlaces(size_t);
 
+    /**
+     * @brief Shifts the decomal places (positive values to the right)
+     *
+     * This is just a wrapper around ::setNDecimalPlaces
+     *
+     * @param nPlaces decimal places to shift
+     */
+    ClassAnalogDigitalMeter& setDecimalShift(int nPlaces);
+
     ClassAnalogDigitalMeter& setAnalogDigitalTransitionEnd(double val);
 
     /**
