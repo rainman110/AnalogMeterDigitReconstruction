@@ -598,6 +598,115 @@ void runFlowEarly()
 }
 
 
+void flowIssue2857_case01(void)
+{
+    // reported by gec75
+    ClassAnalogDigitalMeter meter(3, 4);
+    meter.setNDecimalPlaces(1);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 252090.0,
+        meter.getValue({2.0, 5.0, 1.9, 0.8, 8.8, 9.9, 0.1}).value);
+}
+
+void flowIssue2857_case02(void)
+{
+    // reported by Kornelius777
+    ClassAnalogDigitalMeter meter(5, 4);
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 1017.8099,
+        meter.getValue({0.0, 1.0, 0.0, 1.0, 7.0, 8.2, 0.9, 9.9, 9.8}).value);
+
+    // with hanging digit
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 1017.8099,
+        meter.getValue({0.0, 1.0, 0.0, 1.0, 6.9, 8.2, 0.9, 9.9, 9.8}).value);
+
+    meter.setNDecimalPlaces(6);
+
+    // and deccimal shift
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 10.178099,
+        meter.getValue({0.0, 1.0, 0.0, 1.0, 6.9, 8.2, 0.9, 9.9, 9.8}).value);
+}
+
+void flowIssue2857_case03(void)
+{
+    // reported by marcniedersachsen
+    ClassAnalogDigitalMeter meter(4, 4);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 778.1480,
+        meter.getValue({0.0, 7.0, 7.0, 7.9, 1.4, 4.7, 8.0, 0.5}).value);
+
+    meter.setNDecimalPlaces(1);
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 778148.0,
+        meter.getValue({0.0, 7.0, 7.0, 7.9, 1.4, 4.7, 8.0, 0.5}).value);
+}
+
+void flowIssue2857_case04(void)
+{
+    // reported by ohkaja
+    ClassAnalogDigitalMeter meter(5, 4);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 1052.6669,
+        meter.getValue({0.0, 1.0, 10.0, 4.9, 2.0, 6.7, 6.7, 6.9, 9.1}).value);
+}
+
+
+void runFlowIssue2857()
+{
+    RUN_TEST(flowIssue2857_case01);
+    RUN_TEST(flowIssue2857_case02);
+    RUN_TEST(flowIssue2857_case03);
+    RUN_TEST(flowIssue2857_case04);
+}
+
+void flowRainman110_case01(void)
+{
+    // --> Extreme early digit transition. AnanlogDigitTransition needs to set to 3.5 (was limited to 6)
+    // reported by rainman110
+    ClassAnalogDigitalMeter meter(3, 4);
+    meter.setAnalogDigitalTransitionEnd(4);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 412.3983,
+        meter.getValue({4.0, 1.0, 1.8, 3.6, 9.9, 8.1, 3.5}).value);
+
+    // check before transition
+    // The digit should have went from 8(7.9) -> 9. It will do after pasing 4 on the first analog
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 419.2579,
+        meter.getValue({4.0, 1.0, 7.9, 2.5, 5.8, 7.7, 9.0}).value);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 419.2579,
+        meter.getValue({4.0, 1.0, 8.0, 2.5, 5.8, 7.7, 9.0}).value);
+
+    // check after transition
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 419.5579,
+        meter.getValue({4.0, 1.0, 9.0, 5.5, 5.8, 7.7, 9.0}).value);
+
+    // check robustness variations
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 419.5579,
+        meter.getValue({4.0, 1.0, 8.9, 5.5, 5.8, 7.7, 9.0}).value);
+
+    TEST_ASSERT_FLOAT_WITHIN(
+        1e-5, 419.5579,
+        meter.getValue({4.0, 1.0, 9.1, 5.5, 5.8, 7.7, 9.0}).value);
+}
+
+void runFlowRainman110()
+{
+    RUN_TEST(flowRainman110_case01);
+}
+
+
+
 int main()
 {
     UNITY_BEGIN();
@@ -605,6 +714,8 @@ int main()
     runFlowPP();
     runFlowLate();
     runFlowEarly();
+    runFlowIssue2857();
+    runFlowRainman110();
 
     return UNITY_END();
 
