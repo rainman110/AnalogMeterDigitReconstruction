@@ -80,6 +80,8 @@ public:
      */
     ClassAnalogDigitalMeter& setNDecimalPlaces(size_t);
 
+    size_t nDecimalPlaces() const;
+
     /**
      * @brief Shifts the decomal places (positive values to the right)
      *

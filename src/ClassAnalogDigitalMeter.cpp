@@ -30,11 +30,18 @@ constexpr double pow10(size_t n)
         return pow10_table[n];
 
     double result = pow10_table[pow10_table_size-1];
-    for (size_t i = pow10_table_size; i < n; ++i)
+    for (size_t i = pow10_table_size - 1; i < n; ++i)
         result *= 10.;
 
     return result;
 }
+
+double roundDecimals(double v, size_t nDec)
+{
+    const double base = pow10(nDec);
+    return round(base * v) / base;
+}
+
 
 /**
  * @brief A python-like modulo that results in the range [0, y), i.e. avoid negative numbers
@@ -82,6 +89,11 @@ ClassAnalogDigitalMeter &ClassAnalogDigitalMeter::setNDecimalPlaces(size_t n)
     return *this;
 }
 
+size_t ClassAnalogDigitalMeter::nDecimalPlaces() const
+{
+    return m_nDecimalPlaces;
+}
+
 ClassAnalogDigitalMeter &ClassAnalogDigitalMeter::setDecimalShift(int shift)
 {
     m_nDecimalPlaces = std::max(size_t(0), m_nDials - shift);
@@ -90,11 +102,24 @@ ClassAnalogDigitalMeter &ClassAnalogDigitalMeter::setDecimalShift(int shift)
 
 ClassAnalogDigitalMeter &ClassAnalogDigitalMeter::setAnalogDigitalTransitionEnd(double val)
 {
+    size_t firstAnalogIdx = m_nDigits;
+
+    if (m_nDials == 0 && m_lastDigitTransitionMode == Digital)
+    {
+        // there is no transition
+        return *this;
+    }
+    else if (m_nDials == 0)
+    {
+        // the last digit is actually rolling and therefore handled like an analog
+        firstAnalogIdx = m_nDigits - 1;
+    }
+
     val = modulo(val, 10.);
 
     if (val > 5) val = val - 10.;
 
-    m_phaseDetuneVec[m_nDigits] = val;
+    m_phaseDetuneVec[firstAnalogIdx] = val;
     return *this;
 }
 
@@ -151,7 +176,8 @@ ClassAnalogDigitalMeter::Result ClassAnalogDigitalMeter::getValue(
         return {-1., 0};
     }
 
-    const double lastDigit = modulo(meterValues[nvals-1] - m_phaseDetuneVec[nvals-1], 10.);
+    // round for one decimal place
+    const double lastDigit = roundDecimals(modulo(meterValues[nvals-1] - m_phaseDetuneVec[nvals-1], 10.), 1);
 
     // buffer for the predicted values to avoid reallocations
     DigitVector predictedValues(nvals, 0.);
